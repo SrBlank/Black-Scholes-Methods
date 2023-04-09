@@ -1,3 +1,20 @@
+"""
+Application of Stabalized Runge-Kutta Method of Order 2 (SERK2v2) on
+Black-Scholes Partial Differntial Equation for American Call Options
+
+Authors: Saad Rafiq and Josh Avery
+
+Description: 
+This code contains functions to calculate the Black-Scholes PDE using the SERK2v2 
+method to estimate American call option values. It takes in several parameters, 
+including the initial stock price, strike price, number of discretized stock price
+steps, number of discretized time steps, time to maturity, number of SERK2v2 stages,
+historical stock prices, risk-free interest rate, and stock price volatility.
+The code also includes functions to estimate the annualized return and volatility 
+of a stock given its historical prices. When executed, the code generates a plot of
+the option values and prints the option value at the strike price.
+"""
+
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
