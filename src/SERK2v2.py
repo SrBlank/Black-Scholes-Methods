@@ -199,6 +199,37 @@ def plot_3d_option_values(stock_prices, strike_prices, option_values):
 
     plt.show()
 
+def plot_2d_option_values(filename):
+    # Plot the option values
+    plt.figure(figsize=(10, 6))
+    plt.plot(np.linspace(0, S, N + 1), V[:, 0], label='Option Value')
+    plt.xlabel('Stock Price')
+    plt.ylabel('Option Value')
+    plt.title('American Call Option Value at t=0')
+    plt.legend()
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close()
+
+
+def create_option_value_table(stock_prices, option_values, filename):
+    # Set up the figure and axis for the table
+    fig, ax = plt.subplots(figsize=(20, 10))  # Increase the figure size
+    ax.axis('tight')
+    ax.axis('off')
+
+    # Create a table using stock prices and option values
+    table_data = [[stock_price, option_value] for stock_price, option_value in zip(stock_prices, option_values)]
+    table = ax.table(cellText=table_data, colLabels=['Stock Price', 'Option Value'], cellLoc='center', loc='center')
+
+    # Adjust the table properties
+    table.auto_set_font_size(False)
+    table.set_fontsize(12)
+    table.scale(1, 1.5)
+
+    # Save the table to a high-resolution PNG file
+    plt.savefig(filename, dpi=300, bbox_inches='tight')
+    plt.close(fig)
+
 if __name__ == "__main__":
     strike_prices = np.linspace(50, 150, 21)
     option_values = np.zeros((len(strike_prices), N + 1))
@@ -208,21 +239,8 @@ if __name__ == "__main__":
         option_values[i] = V[:, 0]
 
     plot_3d_option_values(stock_prices, strike_prices, option_values)
+    #create_option_value_table(stock_prices, V[:, 0], './option_value_table.png')
+    #plot_2d_option_values('./2d_option_value_graph.png')
 
-"""
-if __name__ == "__main__":
-    # Compute the option values
-    V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
-
-    # Plot the option values
-    plt.figure(figsize=(10, 6))
-    plt.plot(np.linspace(0, S, N + 1), V[:, 0], label='Option Value')
-    plt.xlabel('Stock Price')
-    plt.ylabel('Option Value')
-    plt.title('American Call Option Value at t=0')
-    plt.legend()
-    plt.show()
-
-    # Print the option value at S=K
     print(f"Option value at S=K: {V[N//2, 0]}")
-"""
+
