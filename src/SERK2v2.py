@@ -18,6 +18,7 @@ the option values and prints the option value at the strike price.
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+from mpl_toolkits.mplot3d import Axes3D
 
 """
 Parameters:
@@ -183,6 +184,32 @@ def calculate_annualized_volatility(stock_prices, T):
     log_returns = np.log(stock_prices[1:] / stock_prices[:-1])
     return np.sqrt(252) * log_returns.std()
 
+
+def plot_3d_option_values(stock_prices, strike_prices, option_values):
+    X, Y = np.meshgrid(stock_prices, strike_prices)
+    Z = option_values
+
+    fig = plt.figure(figsize=(10, 6))
+    ax = fig.add_subplot(111, projection='3d')
+    ax.plot_surface(X, Y, Z)
+
+    ax.set_xlabel('Stock Price')
+    ax.set_ylabel('Strike Price')
+    ax.set_zlabel('Option Value')
+
+    plt.show()
+
+if __name__ == "__main__":
+    strike_prices = np.linspace(50, 150, 21)
+    option_values = np.zeros((len(strike_prices), N + 1))
+
+    for i, K in enumerate(strike_prices):
+        V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
+        option_values[i] = V[:, 0]
+
+    plot_3d_option_values(stock_prices, strike_prices, option_values)
+
+"""
 if __name__ == "__main__":
     # Compute the option values
     V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
@@ -198,3 +225,4 @@ if __name__ == "__main__":
 
     # Print the option value at S=K
     print(f"Option value at S=K: {V[N//2, 0]}")
+"""
