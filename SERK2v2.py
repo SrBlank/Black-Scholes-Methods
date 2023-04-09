@@ -47,7 +47,7 @@ def SERK2v2(g_prev, stock_prices, r, sigma, dS, dT, s_stages, time, m, K):
     Returns:
     ndarray: option values at the current time step
     """
-    alpha = 1 / 0.4
+    alpha = 1 / (0.4*s_stages**2)
     g = np.zeros((s_stages + 1, len(stock_prices)))
     g[0] = g_prev
 
@@ -85,9 +85,10 @@ def black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages):
     ndarray: option values at each stock price and time step
     """
     # Discretize stock prices and time
-    dS = S / N
+    dS = 2 * S / N
     dT = T / M
-    stock_prices = np.linspace(0, S, N + 1)
+    #stock_prices = np.linspace(0, S, N + 1)
+    stock_prices = np.linspace(0, 200, N + 1)
     time = np.linspace(0, T, M + 1)
 
     # Initialize the option values matrix
@@ -95,7 +96,7 @@ def black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages):
 
     # Set option values at maturity (boundary condition)
     V[:, -1] = np.maximum(stock_prices - K, 0)
-
+    
     # Time-stepping loop (backwards in time)
     for m in range(M - 1, -1, -1):
         # Compute option values at the current time step using the SERK2v2 method
@@ -140,19 +141,21 @@ def calculate_annualized_volatility(stock_prices, T):
 
 # Alternatively, use synthetic data for demonstration purposes
 np.random.seed(0)
-stock_prices = np.cumprod(1 + np.random.normal(0.0005, 0.02, size=252))
-T = 1
+#stock_prices = np.cumprod(1 + np.random.normal(0.0005, 0.02, size=252))
+
 
 # Estimate parameters from historical data
-r = calculate_annualized_return(stock_prices, T)
-sigma = calculate_annualized_volatility(stock_prices, T)
+r = .05 #calculate_annualized_return(stock_prices, T)
+sigma = .20 #calculate_annualized_volatility(stock_prices, T)
 
 # Parameters
-S = stock_prices[-1]
+S = 100 #stock_prices[-1]
 K = 100
-N = 100
-M = 100
-s_stages = 20
+N = 200
+M = 200
+stock_prices = np.linspace(0, 200, N + 1)
+T = 1
+s_stages = 4 #20
 
 # Compute the option values
 V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
