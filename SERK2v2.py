@@ -2,6 +2,40 @@ import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 
+"""
+Parameters:
+S (float): initial stock price
+K (float): strike price
+N (int): number of discretized stock price steps
+M (int): number of discretized time steps
+T (float): time to maturity
+s_stages (int): number of SERK2v2 stages
+stock_prices (ndarray): historical stock prices
+r (float): risk-free interest rate
+sigma (float): stock price volatility
+"""
+# Parameters
+S = 100 #stock_prices[-1]
+K = 100
+N = 200
+M = 200
+T = 1
+s_stages = 4 #20
+
+# Load historical stock data here
+# For example, load data from a CSV file:
+# stock_data = pd.read_csv('stock_data.csv')
+# stock_prices = stock_data['Close'].values
+# T = len(stock_prices) / 252  # Assuming 252 trading days in a year
+
+# Synthetic data for demonstration purposes
+np.random.seed(0)
+stock_prices = np.linspace(0, 200, N + 1)
+
+# Estimate parameters from historical data
+r = .05 #calculate_annualized_return(stock_prices, T)
+sigma = .20 #calculate_annualized_volatility(stock_prices, T)
+
 def black_scholes_rhs(stock_prices, g_prev, r, sigma, dS, dT):
     """
     Calculates the right-hand side of the Black-Scholes PDE.
@@ -88,7 +122,7 @@ def black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages):
     dS = 2 * S / N
     dT = T / M
     #stock_prices = np.linspace(0, S, N + 1)
-    stock_prices = np.linspace(0, 200, N + 1)
+    #stock_prices = np.linspace(0, 200, N + 1)
     time = np.linspace(0, T, M + 1)
 
     # Initialize the option values matrix
@@ -132,42 +166,18 @@ def calculate_annualized_volatility(stock_prices, T):
     log_returns = np.log(stock_prices[1:] / stock_prices[:-1])
     return np.sqrt(252) * log_returns.std()
 
+if __name__ == "__main__":
+    # Compute the option values
+    V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
 
-# Load historical stock data here
-# For example, load data from a CSV file:
-# stock_data = pd.read_csv('stock_data.csv')
-# stock_prices = stock_data['Close'].values
-# T = len(stock_prices) / 252  # Assuming 252 trading days in a year
+    # Plot the option values
+    plt.figure(figsize=(10, 6))
+    plt.plot(np.linspace(0, S, N + 1), V[:, 0], label='Option Value')
+    plt.xlabel('Stock Price')
+    plt.ylabel('Option Value')
+    plt.title('American Call Option Value at t=0')
+    plt.legend()
+    plt.show()
 
-# Alternatively, use synthetic data for demonstration purposes
-np.random.seed(0)
-#stock_prices = np.cumprod(1 + np.random.normal(0.0005, 0.02, size=252))
-
-
-# Estimate parameters from historical data
-r = .05 #calculate_annualized_return(stock_prices, T)
-sigma = .20 #calculate_annualized_volatility(stock_prices, T)
-
-# Parameters
-S = 100 #stock_prices[-1]
-K = 100
-N = 200
-M = 200
-stock_prices = np.linspace(0, 200, N + 1)
-T = 1
-s_stages = 4 #20
-
-# Compute the option values
-V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
-
-# Plot the option values
-plt.figure(figsize=(10, 6))
-plt.plot(np.linspace(0, S, N + 1), V[:, 0], label='Option Value')
-plt.xlabel('Stock Price')
-plt.ylabel('Option Value')
-plt.title('American Call Option Value at t=0')
-plt.legend()
-plt.show()
-
-# Print the option value at S=K
-print(f"Option value at S=K: {V[N//2, 0]}")
+    # Print the option value at S=K
+    print(f"Option value at S=K: {V[N//2, 0]}")
