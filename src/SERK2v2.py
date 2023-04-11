@@ -20,40 +20,6 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from mpl_toolkits.mplot3d import Axes3D
 
-"""
-Parameters:
-S (float): initial stock price
-K (float): strike price
-N (int): number of discretized stock price steps
-M (int): number of discretized time steps
-T (float): time to maturity
-s_stages (int): number of SERK2v2 stages
-stock_prices (ndarray): historical stock prices
-r (float): risk-free interest rate
-sigma (float): stock price volatility
-"""
-# Parameters
-S = 100 #stock_prices[-1]
-K = 100
-N = 200
-M = 200
-T = 1
-s_stages = 4 #20
-
-# Load historical stock data here
-# For example, load data from a CSV file:
-# stock_data = pd.read_csv('stock_data.csv')
-# stock_prices = stock_data['Close'].values
-# T = len(stock_prices) / 252  # Assuming 252 trading days in a year
-
-# Synthetic data for demonstration purposes
-np.random.seed(0)
-stock_prices = np.linspace(0, 200, N + 1)
-
-# Estimate parameters from historical data
-r = .05 #calculate_annualized_return(stock_prices, T)
-sigma = .20 #calculate_annualized_volatility(stock_prices, T)
-
 def black_scholes_rhs(stock_prices, g_prev, r, sigma, dS, dT):
     """
     Calculates the right-hand side of the Black-Scholes PDE.
@@ -137,8 +103,13 @@ def black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages):
     ndarray: option values at each stock price and time step
     """
     # Discretize stock prices and time
-    dS = 2 * S / N
-    dT = T / M
+    #dS = 2 * S / N
+    #dT = T / M
+    # NEW PARAMETER CALCULATIONS
+    N = len(stock_prices) - 1
+    dS = 2 * stock_prices[-1] / N
+    dT = T / N
+
     #stock_prices = np.linspace(0, S, N + 1)
     #stock_prices = np.linspace(0, 200, N + 1)
     time = np.linspace(0, T, M + 1)
@@ -199,17 +170,15 @@ def plot_3d_option_values(stock_prices, strike_prices, option_values):
 
     plt.show()
 
-def plot_2d_option_values(filename):
-    # Plot the option values
+def plot_2d_option_values(stock_prices, option_values, filename):
     plt.figure(figsize=(10, 6))
-    plt.plot(np.linspace(0, S, N + 1), V[:, 0], label='Option Value')
+    plt.plot(stock_prices, option_values, label='Option Value')
     plt.xlabel('Stock Price')
     plt.ylabel('Option Value')
     plt.title('American Call Option Value at t=0')
     plt.legend()
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close()
-
 
 def create_option_value_table(stock_prices, option_values, filename):
     # Set up the figure and axis for the table
@@ -230,17 +199,52 @@ def create_option_value_table(stock_prices, option_values, filename):
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close(fig)
 
+
+"""
+Parameters:
+S (float): initial stock price
+K (float): strike price
+N (int): number of discretized stock price steps
+M (int): number of discretized time steps
+T (float): time to maturity
+s_stages (int): number of SERK2v2 stages
+stock_prices (ndarray): historical stock prices
+r (float): risk-free interest rate
+sigma (float): stock price volatility
+"""
+# Parameters
+S = 100 #stock_prices[-1]
+K = 100
+N = 200
+M = 200
+T = 1
+s_stages = 4
+
+# Load historical stock data here
+# For example, load data from a CSV file:
+stock_data = pd.read_csv('../stock_data/aapl_stock_data.csv')
+stock_prices = stock_data['Close'].values
+#T = len(stock_prices) / 252  # Assuming 252 trading days in a year
+
+# Synthetic data for demonstration purposes
+#np.random.seed(0)
+#stock_prices = np.linspace(0, 200, N + 1)
+
+# Estimate parameters from historical data
+r = calculate_annualized_return(stock_prices, T)
+sigma = calculate_annualized_volatility(stock_prices, T)
+
 if __name__ == "__main__":
     strike_prices = np.linspace(50, 150, 21)
     option_values = np.zeros((len(strike_prices), N + 1))
 
-    for i, K in enumerate(strike_prices):
-        V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
-        option_values[i] = V[:, 0]
+    #for i, K in enumerate(strike_prices):
+    V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
+        #option_values[i] = V[:, 0]
 
-    plot_3d_option_values(stock_prices, strike_prices, option_values)
-    #create_option_value_table(stock_prices, V[:, 0], './option_value_table.png')
-    #plot_2d_option_values('./2d_option_value_graph.png')
+    #plot_3d_option_values(stock_prices, strike_prices, option_values)
+    create_option_value_table(stock_prices, V[:, 0], './option_value_table.png')
+    plot_2d_option_values(stock_prices, V[:, 0], './2d_option_value_graph.png')
 
     print(f"Option value at S=K: {V[N//2, 0]}")
 
