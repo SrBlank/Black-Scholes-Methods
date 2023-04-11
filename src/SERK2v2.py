@@ -103,12 +103,8 @@ def black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages):
     ndarray: option values at each stock price and time step
     """
     # Discretize stock prices and time
-    #dS = 2 * S / N
-    #dT = T / M
-    # NEW PARAMETER CALCULATIONS
-    N = len(stock_prices) - 1
-    dS = 2 * stock_prices[-1] / N
-    dT = T / N
+    dS = 2 * S / N
+    dT = T / M
 
     #stock_prices = np.linspace(0, S, N + 1)
     #stock_prices = np.linspace(0, 200, N + 1)
@@ -212,24 +208,21 @@ stock_prices (ndarray): historical stock prices
 r (float): risk-free interest rate
 sigma (float): stock price volatility
 """
-# Parameters
-S = 100 #stock_prices[-1]
-K = 100
-N = 200
-M = 200
-T = 1
-s_stages = 4
 
-# Load historical stock data here
-# For example, load data from a CSV file:
 stock_data = pd.read_csv('../stock_data/aapl_stock_data.csv')
 stock_prices = stock_data['Close'].values
-#T = len(stock_prices) / 252  # Assuming 252 trading days in a year
 
 # Synthetic data for demonstration purposes
 #np.random.seed(0)
 #stock_prices = np.linspace(0, 200, N + 1)
 
+# Parameters
+S = stock_prices[-1]
+K = 140
+N = len(stock_prices) - 1 #200
+M = len(stock_prices) - 1 #200
+T = len(stock_prices) / 252  #1 # Assuming 252 trading days in a year
+s_stages = 20
 # Estimate parameters from historical data
 r = calculate_annualized_return(stock_prices, T)
 sigma = calculate_annualized_volatility(stock_prices, T)
@@ -240,8 +233,10 @@ if __name__ == "__main__":
 
     #for i, K in enumerate(strike_prices):
     V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
-        #option_values[i] = V[:, 0]
-
+        # removes outliers, negative option values
+    V[V < 0] = 0
+    #    option_values[i] = V[:, 0]
+    
     #plot_3d_option_values(stock_prices, strike_prices, option_values)
     create_option_value_table(stock_prices, V[:, 0], './option_value_table.png')
     plot_2d_option_values(stock_prices, V[:, 0], './2d_option_value_graph.png')
