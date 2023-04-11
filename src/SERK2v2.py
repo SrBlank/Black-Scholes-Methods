@@ -123,31 +123,14 @@ def black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages):
 
     return V
 
+# Calculates the annualized return of a stock given its historical prices.
 def calculate_annualized_return(stock_prices, T):
-    """
-    Calculates the annualized return of a stock given its historical prices.
-
-    Parameters:
-    stock_prices (ndarray): historical stock prices
-    T (float): time period in years
-
-    Returns:
-    float: annualized return
-    """
     return_rate = (stock_prices[-1] / stock_prices[0])**(1 / T) - 1
     return return_rate
 
+
+# Calculates the annualized volatility of a stock given its historical prices.
 def calculate_annualized_volatility(stock_prices, T):
-    """
-    Calculates the annualized volatility of a stock given its historical prices.
-
-    Parameters:
-    stock_prices (ndarray): historical stock prices
-    T (float): time period in years
-
-    Returns:
-    float: annualized volatility
-    """
     log_returns = np.log(stock_prices[1:] / stock_prices[:-1])
     return np.sqrt(252) * log_returns.std()
 
@@ -209,10 +192,10 @@ r (float): risk-free interest rate
 sigma (float): stock price volatility
 """
 
+# Import stock data
 stock_data = pd.read_csv('../stock_data/aapl_stock_data.csv')
 stock_prices = stock_data['Close'].values
-
-# Synthetic data for demonstration purposes
+# Synthetic data 
 #np.random.seed(0)
 #stock_prices = np.linspace(0, 200, N + 1)
 
@@ -223,7 +206,6 @@ N = len(stock_prices) - 1 #200
 M = len(stock_prices) - 1 #200
 T = len(stock_prices) / 252  #1 # Assuming 252 trading days in a year
 s_stages = 20
-# Estimate parameters from historical data
 r = calculate_annualized_return(stock_prices, T)
 sigma = calculate_annualized_volatility(stock_prices, T)
 
@@ -238,8 +220,8 @@ if __name__ == "__main__":
     #    option_values[i] = V[:, 0]
     
     #plot_3d_option_values(stock_prices, strike_prices, option_values)
-    create_option_value_table(stock_prices, V[:, 0], './option_value_table.png')
-    plot_2d_option_values(stock_prices, V[:, 0], './2d_option_value_graph.png')
+    create_option_value_table(stock_prices, V[:, 0], '../results/aapl_option_value_table.png')
+    plot_2d_option_values(stock_prices, V[:, 0], '../results/aapl_2d_option_value_graph.png')
 
     print(f"Option value at S=K: {V[N//2, 0]}")
 
