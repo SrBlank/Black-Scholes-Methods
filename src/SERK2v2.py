@@ -223,25 +223,3 @@ if __name__ == "__main__":
     plot_2d_option_values(stock_prices, V[:, 0], '../results/aapl_option_value_graph.png')
 
     print(f"Option value at S=K: {V[N//2, 0]}")
-
-"""
-# Import stock data
-stock_data = pd.read_csv('../stock_data/googl_stock_data.csv')
-stock_prices = stock_data['Close'].values
-# Synthetic data 
-#np.random.seed(0)
-#stock_prices = np.linspace(0, 200, N + 1)
-
-# Parameters
-
-stock_prices.sort()
-#print(stock_prices)
-S = stock_prices[-1]
-K = 100
-N = len(stock_prices) - 1 #200
-M = len(stock_prices) - 1 #200
-T = 1 #len(stock_prices) / 252  #1 # Assuming 252 trading days in a year
-s_stages = 20
-r = calculate_annualized_return(stock_prices, T)
-sigma = calculate_annualized_volatility(stock_prices, T)
-"""
