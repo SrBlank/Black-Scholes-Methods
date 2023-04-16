@@ -78,7 +78,7 @@ def SERK2v2(g_prev, stock_prices, r, sigma, dS, dT, s_stages, time, m, K):
 
         # Handle boundary conditions
         g0 = 0
-        gN = 2 * g_prev[-1] - g_prev[-2]  # Fixed boundary condition
+        gN = stock_prices[-1] - K * np.exp(-r * (T - time[m]))
 
         g[j] = np.concatenate(([g0], g_interior, [gN]))
 
@@ -114,7 +114,7 @@ def black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages):
     V = np.zeros((N + 1, M + 1))
 
     # Set option values at maturity (boundary condition)
-    V[:, -1] = np.maximum(stock_prices - K, 0)
+    V[:, -1] = np.maximum(stock_prices - K*np.exp(-r*time), 0)
     
     # Time-stepping loop (backwards in time)
     for m in range(M - 1, -1, -1):
@@ -131,8 +131,10 @@ def calculate_annualized_return(stock_prices, T):
 
 # Calculates the annualized volatility of a stock given its historical prices.
 def calculate_annualized_volatility(stock_prices, T):
-    log_returns = np.log(stock_prices[1:] / stock_prices[:-1])
-    return np.sqrt(252) * log_returns.std()
+    mean = sum(stock_prices) / len(stock_prices)
+    variance = sum([((x - mean) ** 2) for x in stock_prices]) / len(stock_prices)
+    res = variance ** 0.5
+    return res/100
 
 
 def plot_3d_option_values(stock_prices, strike_prices, option_values):
@@ -192,22 +194,19 @@ r (float): risk-free interest rate
 sigma (float): stock price volatility
 """
 
-# Import stock data
 stock_data = pd.read_csv('../stock_data/aapl_stock_data.csv')
 stock_prices = stock_data['Close'].values
-# Synthetic data 
-#np.random.seed(0)
-#stock_prices = np.linspace(0, 200, N + 1)
+stock_prices.sort()
 
-# Parameters
+# Parameters for synthetic data
+M = len(stock_prices) - 1
+N = len(stock_prices) - 1
 S = stock_prices[-1]
 K = 140
-N = len(stock_prices) - 1 #200
-M = len(stock_prices) - 1 #200
-T = len(stock_prices) / 252  #1 # Assuming 252 trading days in a year
+T = len(stock_prices) / 252 #1
 s_stages = 20
-r = calculate_annualized_return(stock_prices, T)
-sigma = calculate_annualized_volatility(stock_prices, T)
+r =  .03 
+sigma = calculate_annualized_volatility(stock_prices, T) 
 
 if __name__ == "__main__":
     strike_prices = np.linspace(50, 150, 21)
@@ -216,12 +215,33 @@ if __name__ == "__main__":
     #for i, K in enumerate(strike_prices):
     V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
         # removes outliers, negative option values
-    V[V < 0] = 0
-    #    option_values[i] = V[:, 0]
+    #V[V < 0] = 0
+        #option_values[i] = V[:, 0]
     
     #plot_3d_option_values(stock_prices, strike_prices, option_values)
     create_option_value_table(stock_prices, V[:, 0], '../results/aapl_option_value_table.png')
-    plot_2d_option_values(stock_prices, V[:, 0], '../results/aapl_2d_option_value_graph.png')
+    plot_2d_option_values(stock_prices, V[:, 0], '../results/aapl_option_value_graph.png')
 
     print(f"Option value at S=K: {V[N//2, 0]}")
 
+"""
+# Import stock data
+stock_data = pd.read_csv('../stock_data/googl_stock_data.csv')
+stock_prices = stock_data['Close'].values
+# Synthetic data 
+#np.random.seed(0)
+#stock_prices = np.linspace(0, 200, N + 1)
+
+# Parameters
+
+stock_prices.sort()
+#print(stock_prices)
+S = stock_prices[-1]
+K = 100
+N = len(stock_prices) - 1 #200
+M = len(stock_prices) - 1 #200
+T = 1 #len(stock_prices) / 252  #1 # Assuming 252 trading days in a year
+s_stages = 20
+r = calculate_annualized_return(stock_prices, T)
+sigma = calculate_annualized_volatility(stock_prices, T)
+"""
