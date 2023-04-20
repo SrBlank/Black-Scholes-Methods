@@ -18,6 +18,7 @@ the option values and prints the option value at the strike price.
 import numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
+import time
 from mpl_toolkits.mplot3d import Axes3D
 
 def black_scholes_rhs(stock_prices, g_prev, r, sigma, dS, dT):
@@ -156,7 +157,7 @@ def plot_2d_option_values(stock_prices, option_values, filename):
     plt.plot(stock_prices, option_values, label='Option Value')
     plt.xlabel('Stock Price')
     plt.ylabel('Option Value')
-    plt.title('American Call Option Value at t=0')
+    plt.title('Apple K=140 Stock Price vs Option Value')
     plt.legend()
     plt.savefig(filename, dpi=300, bbox_inches='tight')
     plt.close()
@@ -204,7 +205,7 @@ N = len(stock_prices) - 1
 S = stock_prices[-1]
 K = 140
 T = len(stock_prices) / 252 #1
-s_stages = 20
+s_stages = 140
 r =  .03 
 sigma = calculate_annualized_volatility(stock_prices, T) 
 
@@ -212,14 +213,19 @@ if __name__ == "__main__":
     strike_prices = np.linspace(50, 150, 21)
     option_values = np.zeros((len(strike_prices), N + 1))
 
+    start_time = time.time()
+
     #for i, K in enumerate(strike_prices):
     V = black_scholes_american_call_option(S, K, T, r, sigma, N, M, s_stages)
         # removes outliers, negative option values
     #V[V < 0] = 0
         #option_values[i] = V[:, 0]
-    
+    end_time = time.time()
+    run_time = end_time - start_time
+    print(f"Execution time: {run_time} seconds")
+
     #plot_3d_option_values(stock_prices, strike_prices, option_values)
-    create_option_value_table(stock_prices, V[:, 0], '../results/aapl_option_value_table.png')
-    plot_2d_option_values(stock_prices, V[:, 0], '../results/aapl_option_value_graph.png')
+    #create_option_value_table(stock_prices, V[:, 0], '../results/aapl_option_value_table.png')
+    #plot_2d_option_values(stock_prices, V[:, 0], '../results/aapl_option_value_graph.png')
 
     print(f"Option value at S=K: {V[N//2, 0]}")
